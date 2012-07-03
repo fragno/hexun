@@ -1,0 +1,3 @@
+#ignore all produced *.pyc files
+*.pyc
+
