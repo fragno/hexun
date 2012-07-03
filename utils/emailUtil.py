@@ -2,6 +2,7 @@
 #coding: utf-8
 
 import smtplib
+import getpass
 from email.mime.text import MIMEText
 
 def emailme(warning):
@@ -10,7 +11,7 @@ def emailme(warning):
     subject = '基金报告'
     smtpserver = 'smtp.163.com'
     username = 'fragno12'
-    password = '1009257221'
+    password = getpass.getpass("Enter Email Password: ")
 
     msg = MIMEText('<html><h3>' + warning + '</h3></html>','html','utf-8')
     

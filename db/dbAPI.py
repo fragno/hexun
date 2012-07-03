@@ -2,6 +2,7 @@
 #! /usr/bin/env python
 
 import os
+import getpass
 from random import randrange as rrange
 
 COLSIZE = 10
@@ -45,7 +46,9 @@ def connect(db, dbName):
         try:
             cxn = MySQLdb.connect(db=dbName, charset='utf8')
         except DB_EXC.OperationalError, e:
-            cxn = MySQLdb.connect(user='root', passwd='1009257221', charset='utf8')
+            mysqluser = raw_input("Enter mysql user: ")
+            password = getpass.getpass('Enter mysql Password: ')
+            cxn = MySQLdb.connect(user=mysqluser, passwd=password, charset='utf8')
             try:
                 cxn.query('DROP DATABASE %s' % dbName)
             except DB_EXC.OperationalError, e:
