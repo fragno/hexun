@@ -11,7 +11,7 @@ def emailme(warning):
     subject = '基金报告'
     smtpserver = 'smtp.163.com'
     username = 'fragno12'
-    password = getpass.getpass("Enter Email Password: ")
+    password = getpass.getpass("Email Username: fragno12@163.com\nEnter Email Password: ")
 
     msg = MIMEText('<html><h3>' + warning + '</h3></html>','html','utf-8')
     

@@ -2,7 +2,7 @@
 '''
 software name:   hexun fund data analyser
 author:          kris
-date: 
+date:            2012.07.01
 version:         1.0
 '''
 
@@ -18,38 +18,66 @@ import re
 from db.dbAPI import connect, create, insert
 
 from utils.timeUtil import getdayofday
+from dataProcess import dayDhl 
+
+#
+#function:    create new database from the hexun fund website
+#parameters:  days: how many days of data you want to include, including today
+#             flag: indicate whether create a new table
+#
+
+def NewDatabase(days, flag):
+    for i in range(-1*days,0):
+        enddate = str(getdayofday(i))
+        url = "http://jingzhi.funds.hexun.com/jz/kaifang.aspx?&subtype=4" + "&enddate=" + enddate
+        html_src = urllib2.urlopen(url) #download html source
+        parser = BeautifulSoup(html_src, fromEncoding="gbk")
+        scroll_list = parser.findAll('table', attrs={'id':'scroll_list'})
+
+        #connect to the database "hexunFund.db"
+        cxn = connect("mysql", "hexunFund")
+        cur = cxn.cursor()
+        if flag:
+            create(cur)
+
+        #print scroll_list[0].findAll('tr')[0].findAll('td')[1].contents[0].contents
+        allFunds = scroll_list[0].findAll('tr')
+        fundLength =  len(allFunds)
+        for i in range(fundLength):
+            items = allFunds[i].findAll('td')
+            itemLength = len(items)
+            rowData = [enddate]
+            for j in range(itemLength):
+                try:
+                    #print items[j].contents[0].text.ljust(13,' '),
+                    rowData.append(items[j].contents[0].text)
+                except:
+                    #print items[j].contents[0].ljust(13,' '),
+                    rowData.append(items[j].contents[0])
+            print rowData
+            del rowData[1]
+            del rowData[6]
+            del rowData[9]
+            del rowData[8]
+            insert(cur, 'mysql', tuple(rowData))
+
+        cur.close()
+        cxn.commit()
+        cxn.close()
+        os.system("notify-send 'HexunFund' 'Baby Done'")
 
 
-
-
-for i in range(-30, 0):
-    enddate = str(getdayofday(i))
+def AddTodayInfoToDb():
+    enddate = str(getdayofday(-1))
     url = "http://jingzhi.funds.hexun.com/jz/kaifang.aspx?&subtype=4" + "&enddate=" + enddate
     html_src = urllib2.urlopen(url) #download html source
-
-    ##############encode problem solve#################################################
     parser = BeautifulSoup(html_src, fromEncoding="gbk")
-    ###################################################################################
-
-    # for debug
-    '''
-    htmlFile = open('htmlfil.txt', 'w')
-    htmlFile.write(str(parser))
-    htmlFile.close()
-    '''
-
-    # for debug
-    #html_src = open('htmlfil.txt', 'r')
-    #parser = BeautifulSoup(html_src)
-
-    #scroll_title = parser.findAll(attrs={'id':'scroll_title'})
     scroll_list = parser.findAll('table', attrs={'id':'scroll_list'})
 
     #connect to the database "hexunFund.db"
     cxn = connect("mysql", "hexunFund")
     cur = cxn.cursor()
-    create(cur)
-
+    
     #print scroll_list[0].findAll('tr')[0].findAll('td')[1].contents[0].contents
     allFunds = scroll_list[0].findAll('tr')
     fundLength =  len(allFunds)
@@ -65,12 +93,22 @@ for i in range(-30, 0):
                 #print items[j].contents[0].ljust(13,' '),
                 rowData.append(items[j].contents[0])
         del rowData[1]
-        del rowData[7]
-        del rowData[10]
+        del rowData[6]
         del rowData[9]
+        del rowData[8]
         insert(cur, 'mysql', tuple(rowData))
 
     cur.close()
     cxn.commit()
     cxn.close()
     os.system("notify-send 'HexunFund' 'Baby Done'")
+
+def main():
+    AddTodayInfoToDb()
+    #dayDhl()
+    #NewDatabase(4,0)
+
+if __name__=="__main__":
+    main()
+
+

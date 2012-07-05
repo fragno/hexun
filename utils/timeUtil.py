@@ -163,7 +163,7 @@ def addzero(n):
         return nabs 
  
 def main(): 
-    print getdayofday(-1)
+    print getdayofday(0)
 
 if __name__ == "__main__":
     main()
